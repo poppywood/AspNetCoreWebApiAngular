@@ -1,44 +1,88 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCoreWebApiAngular.DataContext;
+using AspNetCoreWebApiAngular.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCoreWebApiAngular.Controllers
 {
-    [Route("api/[controller]")]
-    public class SampleDataController : Controller
+    [Route("api/sampledata")]
+    [ApiController]
+    public class SampleDataController : ControllerBase
     {
-        private static string[] Summaries = new[]
+        private readonly MonitorContext _context;
+        public SampleDataController(MonitorContext context)
         {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-        [HttpGet("[action]")]
-        public IEnumerable<WeatherForecast> WeatherForecasts()
-        {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                DateFormatted = DateTime.Now.AddDays(index).ToString("d"),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            });
+            _context = context;
         }
 
-        public class WeatherForecast
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Monitor>>>  MonitoringResults()
         {
-            public string DateFormatted { get; set; }
-            public int TemperatureC { get; set; }
-            public string Summary { get; set; }
+            return await _context.Monitors.ToListAsync();
+        }
 
-            public int TemperatureF
-            {
-                get
-                {
-                    return 32 + (int)(TemperatureC / 0.5556);
-                }
+        [HttpPost]  
+        public async Task<ActionResult<Monitor>> CreateMonitor(Monitor model)  
+        {  
+            ModelState.Remove("Id");  
+            if (ModelState.IsValid)  
+            {  
+                _context.Monitors.Add(model);  
+                await _context.SaveChangesAsync();  
             }
+
+            return CreatedAtAction(nameof(GetMonitor), new { id = model.Id }, model);
         }
+
+        [HttpPost]
+        public async Task<ActionResult<Monitor>>  UpdateMonitor(Monitor model)  
+        {
+            if (ModelState.IsValid)  
+            {  
+                _context.Monitors.Update(model);  
+                await _context.SaveChangesAsync();  
+            }
+
+            return CreatedAtAction(nameof(GetMonitor), new { id = model.Id }, model);
+        }  
+
+        [HttpPost]
+        public  async Task<IActionResult>  DeleteMonitor(Monitor model)  
+        {
+            if (ModelState.IsValid)  
+            {  
+                _context.Monitors.Remove(model);  
+                await _context.SaveChangesAsync();
+            }
+
+            return NoContent();
+        }  
+
+        [HttpGet]  
+        public async Task<ActionResult<Monitor>>  GetMonitor(int id)  
+        {  
+            var monitor = await _context.Monitors.FindAsync(id);
+
+            if (monitor == null)
+            {
+                return NotFound();
+            }
+
+            return monitor;         
+        }  
+
+        public IActionResult Delete(int id)  
+        {  
+            Monitor data = _context.Monitors.FirstOrDefault(p => p.Id == id);   
+            if (data != null)  
+            {  
+                _context.Monitors.Remove(data);  
+                _context.SaveChanges();  
+            }  
+            return RedirectToAction("Index");  
+        }  
     }
 }
