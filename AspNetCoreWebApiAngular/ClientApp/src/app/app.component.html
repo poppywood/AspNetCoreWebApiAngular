@@ -1,0 +1,29 @@
+<div class='container-fluid'>
+  <div class='row'>
+    <div class='col-sm-3'>
+      <app-nav-menu></app-nav-menu>
+    </div>
+      <div class='col-sm-9 body-content'>
+          <h1>{{title}}</h1>  
+          <h3>{{subtitle}}</h3>  
+          <h4>  
+              Current Date and Time:   {{datetime | date:'yyyy-MM-dd hh:mm'}}  
+          </h4>  
+          <h2>Angular 7 Virtual Scrolling Example</h2>
+          <hr/>
+          <ul class="list">
+              <cdk-virtual-scroll-viewport style="width: 200px; height: 300px" itemSize="5">
+                  <ng-container *cdkVirtualFor="let incValue of incrementValue">
+                      <li> Loop {{incValue}} </li>
+                  </ng-container>
+              </cdk-virtual-scroll-viewport>
+          </ul>
+          <h2>Angular 7 Drag and Drop </h2>  
+          <hr />  
+          <div cdkDropList class="divClasslist" (cdkDropListDropped)="drop($event)">  
+              <div class="divClass"  *ngFor="let decValue of decrementValue" cdkDrag>{{decValue}}</div>  
+          </div> 
+          <router-outlet></router-outlet>
+      </div>
+  </div>
+</div>
